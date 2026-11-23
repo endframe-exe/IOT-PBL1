@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "author": "AgriSense Group 11",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-arduino-uno",
+      "id": "uno",
+      "top": 240,
+      "left": 260,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": 30,
+      "left": 260,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot_z1",
+      "top": 120,
+      "left": -60,
+      "attrs": { "label": "Zone 1 Moisture (A0)" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot_z2",
+      "top": 240,
+      "left": -60,
+      "attrs": { "label": "Zone 2 Moisture (A1)" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot_tank",
+      "top": 360,
+      "left": -60,
+      "attrs": { "label": "Water Tank Level (A2)" }
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "sw_rain",
+      "top": 140,
+      "left": 100,
+      "attrs": { "label": "Rain Sensor (D2)" }
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "sw_manual",
+      "top": 220,
+      "left": 100,
+      "attrs": { "label": "Manual Override (D3)" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_clock",
+      "top": 300,
+      "left": 100,
+      "attrs": { "color": "blue", "label": "Clock Pulse (D4)" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_reset",
+      "top": 380,
+      "left": 100,
+      "attrs": { "color": "red", "label": "Fault Reset (D5)" }
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay_pump",
+      "top": 140,
+      "left": 660,
+      "attrs": { "label": "Pump Relay (D8)" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_valve1",
+      "top": 280,
+      "left": 660,
+      "attrs": { "color": "yellow", "label": "Valve 1 (D9)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 315,
+      "left": 600,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_valve2",
+      "top": 350,
+      "left": 660,
+      "attrs": { "color": "green", "label": "Valve 2 (D10)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 385,
+      "left": 600,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_fert",
+      "top": 420,
+      "left": 660,
+      "attrs": { "color": "blue", "label": "Fertigation (D11)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 455,
+      "left": 600,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_alarm",
+      "top": 490,
+      "left": 660,
+      "attrs": { "color": "red", "label": "Alarm (D12)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r4",
+      "top": 525,
+      "left": 600,
+      "attrs": { "value": "220" }
+    }
+  ],
+  "connections": [
+    [ "lcd:GND", "uno:GND.1", "black", [ "h-20", "v80" ] ],
+    [ "lcd:VCC", "uno:5V", "red", [ "h-15", "v90" ] ],
+    [ "lcd:SDA", "uno:A4", "green", [ "h-30", "v120" ] ],
+    [ "lcd:SCL", "uno:A5", "blue", [ "h-35", "v125" ] ],
+
+    [ "pot_z1:GND", "uno:GND.1", "black", [ "v20", "h150" ] ],
+    [ "pot_z1:VCC", "uno:5V", "red", [ "v30", "h160" ] ],
+    [ "pot_z1:SIG", "uno:A0", "orange", [ "v40", "h180" ] ],
+
+    [ "pot_z2:GND", "uno:GND.1", "black", [ "v20", "h150" ] ],
+    [ "pot_z2:VCC", "uno:5V", "red", [ "v30", "h160" ] ],
+    [ "pot_z2:SIG", "uno:A1", "yellow", [ "v40", "h180" ] ],
+
+    [ "pot_tank:GND", "uno:GND.1", "black", [ "v20", "h150" ] ],
+    [ "pot_tank:VCC", "uno:5V", "red", [ "v30", "h160" ] ],
+    [ "pot_tank:SIG", "uno:A2", "blue", [ "v40", "h180" ] ],
+
+    [ "sw_rain:1", "uno:GND.1", "black", [ "v15", "h40" ] ],
+    [ "sw_rain:2", "uno:2", "purple", [ "v20", "h100" ] ],
+    [ "sw_rain:3", "uno:5V", "red", [ "v25", "h50" ] ],
+
+    [ "sw_manual:1", "uno:GND.1", "black", [ "v15", "h40" ] ],
+    [ "sw_manual:2", "uno:3", "cyan", [ "v20", "h100" ] ],
+    [ "sw_manual:3", "uno:5V", "red", [ "v25", "h50" ] ],
+
+    [ "btn_clock:1.l", "uno:4", "blue", [ "v15", "h90" ] ],
+    [ "btn_clock:2.l", "uno:GND.2", "black", [ "v25", "h80" ] ],
+
+    [ "btn_reset:1.l", "uno:5", "red", [ "v15", "h90" ] ],
+    [ "btn_reset:2.l", "uno:GND.2", "black", [ "v25", "h80" ] ],
+
+    [ "relay_pump:VCC", "uno:5V", "red", [ "h-40", "v80" ] ],
+    [ "relay_pump:GND", "uno:GND.3", "black", [ "h-50", "v90" ] ],
+    [ "relay_pump:IN", "uno:8", "orange", [ "h-60", "v100" ] ],
+
+    [ "uno:9", "r1:1", "yellow", [ "h20", "v30" ] ],
+    [ "r1:2", "led_valve1:A", "yellow", [ "h10" ] ],
+    [ "led_valve1:C", "uno:GND.3", "black", [ "h-20", "v-30" ] ],
+
+    [ "uno:10", "r2:1", "green", [ "h20", "v30" ] ],
+    [ "r2:2", "led_valve2:A", "green", [ "h10" ] ],
+    [ "led_valve2:C", "uno:GND.3", "black", [ "h-20", "v-30" ] ],
+
+    [ "uno:11", "r3:1", "blue", [ "h20", "v30" ] ],
+    [ "r3:2", "led_fert:A", "blue", [ "h10" ] ],
+    [ "led_fert:C", "uno:GND.3", "black", [ "h-20", "v-30" ] ],
+
+    [ "uno:12", "r4:1", "red", [ "h20", "v30" ] ],
+    [ "r4:2", "led_alarm:A", "red", [ "h10" ] ],
+    [ "led_alarm:C", "uno:GND.3", "black", [ "h-20", "v-30" ] ]
+  ],
+  "dependencies": {}
+}

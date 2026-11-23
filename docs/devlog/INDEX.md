@@ -1,0 +1,12 @@
+# AgriSense Development Log - Master Index
+
+| Date/Time | Segment File | Update Title | Syllabus Module | Verification |
+| :--- | :--- | :--- | :--- | :--- |
+| 2026-11-24 02:03 | [01_setup_spec_lock.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/01_setup_spec_lock.md) | Update #1: Devlog & Workspace Rules Bootstrap | Infrastructure | PASS (Workspace rules & file hierarchy validated) |
+| 2026-11-24 02:08 | [01_setup_spec_lock.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/01_setup_spec_lock.md) | Update #2: Environment Bootstrap & Spec Lock v1.1 | Infrastructure & Spec Lock | PASS (Environment created & Spec Lock verified) |
+| 2026-11-24 02:15 | [02_digital_core.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/02_digital_core.md) | Update #3: Core Digital Logic Engine & Test Suite | Modules 1–4 | PASS (.\.venv\Scripts\pytest -v: 40/40 passed) |
+| 2026-11-24 02:19 | [03_db_and_reports.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/03_db_and_reports.md) | Update #4: Database, Reports & Evidence Dossier | Module 1–5 Data & Reports | PASS (pytest 44/44 passed & generate_evidence.py PASS) |
+| 2026-11-24 02:22 | [04_streamlit_ui.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/04_streamlit_ui.md) | Update #5: Streamlit Interactive Dashboard & Control Center | User Interface & Presentation | PASS (streamlit run app.py on port 8501: PASS) |
+| 2026-11-24 02:39 | [05_wokwi_firmware.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/05_wokwi_firmware.md) | Update #6: Wokwi Arduino Uno Circuit & Embedded Firmware | Module 5 Hardware Parity | PASS (pytest 45/45 passed & diagram JSON syntax valid) |
+| 2026-11-24 02:43 | [06_fixes_and_release.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/06_fixes_and_release.md) | Update #7: Release Audit & Final Documentation | Full Stack Release Audit | PASS (pytest 45/45, evidence script PASS, git clean) |
+| 2026-11-24 03:32 | [04_streamlit_ui.md](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/docs/devlog/04_streamlit_ui.md) | Update #8: 3D Virtual Farm Twin & 1-Click Launcher | 3D Twin & Presentation | PASS (pytest 45/45 passed & twin rendered cleanly) |

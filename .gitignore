@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Databases and temporary runtime artifacts
+*.sqlite3
+*.db
+agrisense.db
+
+# Exported evidence and reports
+*.pdf
+exports/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

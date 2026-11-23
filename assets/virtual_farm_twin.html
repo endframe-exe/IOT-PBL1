@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AgriSense 3D Digital Twin | Virtual Farm Simulator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: radial-gradient(circle at 50% 20%, #1a2a1d 0%, #0d140e 100%);
+      color: #e0e0e0;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+    }
+    .twin-container {
+      width: 100%;
+      max-width: 1100px;
+      background: rgba(22, 33, 24, 0.85);
+      border: 1px solid rgba(74, 140, 85, 0.35);
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(74, 140, 85, 0.25);
+      padding-bottom: 10px;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title h2 {
+      font-size: 1.25rem;
+      color: #7cd98a;
+      letter-spacing: 0.5px;
+    }
+    .badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-sim {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+    .badge-live {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.4);
+    }
+    .badge-fault {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      border: 1px solid rgba(244, 67, 54, 0.4);
+    }
+
+    /* HUD Dashboard Row */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    .hud-card {
+      background: rgba(13, 20, 14, 0.7);
+      border: 1px solid rgba(74, 140, 85, 0.2);
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .hud-label {
+      font-size: 0.68rem;
+      color: #8fa892;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .hud-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+
+    /* Canvas Viewport */
+    .viewport-box {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      background: linear-gradient(180deg, #121c13 0%, #0a110b 100%);
+      border-radius: 8px;
+      border: 1px solid rgba(74, 140, 85, 0.25);
+      overflow: hidden;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Controls Bar */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    button.action-btn {
+      background: linear-gradient(180deg, #27452d 0%, #192d1d 100%);
+      color: #c5e1c9;
+      border: 1px solid #3d6b46;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease-in-out;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    button.action-btn:hover {
+      background: linear-gradient(180deg, #325a3a 0%, #203b26 100%);
+      color: #ffffff;
+      border-color: #5aa167;
+      transform: translateY(-1px);
+    }
+    button.action-btn:active {
+      transform: translateY(1px);
+    }
+    button.action-btn.active-toggle {
+      background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 100%);
+      color: #ffffff;
+      border-color: #81c784;
+      box-shadow: 0 0 8px rgba(129, 199, 132, 0.5);
+    }
+    button.action-btn.danger-btn {
+      background: linear-gradient(180deg, #4d1c19 0%, #30110f 100%);
+      border-color: #7a2c28;
+      color: #f7b2af;
+    }
+    button.action-btn.danger-btn:hover {
+      background: linear-gradient(180deg, #662521 0%, #451815 100%);
+      color: #ffffff;
+      border-color: #a83d37;
+    }
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      color: #6d8570;
+      padding-top: 4px;
+      border-top: 1px solid rgba(74, 140, 85, 0.2);
+    }
+    .math-pill {
+      background: rgba(0,0,0,0.4);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #9fe0a8;
+      border: 1px solid rgba(74, 140, 85, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+<div class="twin-container">
+  <!-- Header Bar -->
+  <div class="header-bar">
+    <div class="header-title">
+      <h2>🌱 AgriSense 2.5D Digital Twin</h2>
+      <span class="badge badge-sim">DEC0101 Virtual Farm</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span id="fsm-badge" class="badge badge-live">STATE: IDLE (00)</span>
+      <span id="pipo-badge" class="badge badge-sim">PIPO: 0000 [0x0]</span>
+    </div>
+  </div>
+
+  <!-- HUD Telemetry Grid -->
+  <div class="hud-grid">
+    <div class="hud-card">
+      <div class="hud-label">Zone 1 Soil</div>
+      <div id="hud-z1" class="hud-value">50.0%</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Zone 2 Soil</div>
+      <div id="hud-z2" class="hud-value">50.0%</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Water Reservoir</div>
+      <div id="hud-tank" class="hud-value">80.0%</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Pump Relay (P)</div>
+      <div id="hud-pump" class="hud-value">0 (OFF)</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Low Tank Alarm (A)</div>
+      <div id="hud-alarm" class="hud-value">0 (SAFE)</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">MOD-16 Count</div>
+      <div id="hud-cnt" class="hud-value">0 [0000]</div>
+    </div>
+  </div>
+
+  <!-- 2.5D Canvas Isometric Viewport -->
+  <div class="viewport-box">
+    <canvas id="farmCanvas"></canvas>
+  </div>
+
+  <!-- 1-Click Interactive Switches Panel -->
+  <div class="controls-panel">
+    <div class="button-grid">
+      <button id="btn-clock" class="action-btn" onclick="stepClock()">
+        ⏱️ Next Clock Pulse
+      </button>
+      <button id="btn-rain" class="action-btn" onclick="toggleRain()">
+        🌧️ Rain Interlock (OFF)
+      </button>
+      <button id="btn-z1" class="action-btn" onclick="triggerZone1Dry()">
+        🌾 Irrigate Zone 1
+      </button>
+      <button id="btn-z2" class="action-btn" onclick="triggerZone2Dry()">
+        🍅 Irrigate Zone 2
+      </button>
+      <button id="btn-manual" class="action-btn" onclick="toggleManual()">
+        🕹️ Manual Pump (OFF)
+      </button>
+      <button id="btn-fert" class="action-btn" onclick="triggerFertigationDemo()">
+        🧪 NPK Dose (Count 4)
+      </button>
+      <button id="btn-tank-fault" class="action-btn danger-btn" onclick="triggerLowTankFault()">
+        ⚠️ Empty Tank (<20%)
+      </button>
+      <button id="btn-pipe-burst" class="action-btn danger-btn" onclick="triggerPipeBurstWatchdog()">
+        💥 Pipe Burst (Count 15)
+      </button>
+      <button id="btn-reset" class="action-btn" onclick="resetFarm()">
+        🔄 Reset Simulation
+      </button>
+    </div>
+  </div>
+
+  <!-- Mathematical & Architectural Footer -->
+  <div class="footer-bar">
+    <div>
+      Boolean Core: <span class="math-pill">P = W · R' · (O + M)</span> | Alarm: <span class="math-pill">A = W'</span>
+    </div>
+    <div>
+      Hysteresis: <span class="math-pill">&lt;30% Start | &gt;=45% Stop</span> | Watchdog: <span class="math-pill">Count 15 Lockout</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =========================================================================
+  // AGRISENSE DIGITAL CORE PHYSICS & BOOLEAN ENGINE (CLIENT-SIDE MIRROR)
+  // =========================================================================
+
+  const DRY_THRESHOLD = 30.0;
+  const WET_CLEAR_THRESHOLD = 45.0;
+  const MIN_TANK_SAFE = 20.0;
+  const FERTIGATION_COUNT = 4;
+  const WATCHDOG_COUNT = 15;
+
+  let state = {
+    z1: 50.0,
+    z2: 50.0,
+    tank: 80.0,
+    rain: false,
+    manual: false,
+    manualTarget: 'ZONE_1',
+    pipeBurst: false,
+    z1Demand: false,
+    z2Demand: false,
+    fsm: 'IDLE', // IDLE, ZONE_1_ACTIVE, ZONE_2_ACTIVE, FAULT_LOCK
+    fsmCode: '00',
+    counter: 0,
+    pump: 0,
+    alarm: 0,
+    fertPulse: false,
+    watchdogTripped: false,
+    pipo: [0, 0, 0, 0], // Q3, Q2, Q1, Q0
+  };
+
+  function updateHysteresis() {
+    if (state.z1 < DRY_THRESHOLD) state.z1Demand = true;
+    else if (state.z1 >= WET_CLEAR_THRESHOLD) state.z1Demand = false;
+
+    if (state.z2 < DRY_THRESHOLD) state.z2Demand = true;
+    else if (state.z2 >= WET_CLEAR_THRESHOLD) state.z2Demand = false;
+  }
+
+  function evaluateCombinational() {
+    updateHysteresis();
+    const M = state.z1Demand || state.z2Demand;
+    const W = state.tank >= MIN_TANK_SAFE;
+    const R = state.rain;
+    const O = state.manual;
+    const P = W && !R && (O || M);
+    const A = !W;
+    return { M, W, R, O, P: P ? 1 : 0, A: A ? 1 : 0 };
+  }
+
+  function stepClock() {
+    const comb = evaluateCombinational();
+    let nextState = state.fsm;
+    let effectivePump = 0;
+    let fertPulse = false;
+
+    if (state.fsm === 'FAULT_LOCK') {
+      nextState = 'FAULT_LOCK';
+      effectivePump = 0;
+    } else if (!comb.W) {
+      nextState = 'FAULT_LOCK';
+      effectivePump = 0;
+    } else if (state.watchdogTripped) {
+      nextState = 'FAULT_LOCK';
+      effectivePump = 0;
+    } else if (comb.R) {
+      nextState = 'IDLE';
+      effectivePump = 0;
+    } else if (comb.P === 1) {
+      if (state.z1Demand) nextState = 'ZONE_1_ACTIVE';
+      else if (state.z2Demand) nextState = 'ZONE_2_ACTIVE';
+      else if (state.manual) nextState = 'ZONE_1_ACTIVE';
+      effectivePump = 1;
+    } else {
+      nextState = 'IDLE';
+      effectivePump = 0;
+    }
+
+    // MOD-16 Synchronous Counter
+    if (effectivePump === 1) {
+      state.counter = (state.counter + 1) % 16;
+      if (state.counter === FERTIGATION_COUNT) fertPulse = true;
+      else if (state.counter === WATCHDOG_COUNT) {
+        state.watchdogTripped = true;
+        nextState = 'FAULT_LOCK';
+        effectivePump = 0;
+      }
+    } else {
+      if (nextState === 'IDLE') state.counter = 0;
+    }
+
+    // Virtual Farm Physics
+    if (effectivePump === 1) {
+      state.tank = Math.max(0.0, state.tank - 2.0);
+      const gain = state.pipeBurst ? 0.0 : 5.0;
+      if (nextState === 'ZONE_1_ACTIVE') state.z1 = Math.min(100.0, state.z1 + gain);
+      else if (nextState === 'ZONE_2_ACTIVE') state.z2 = Math.min(100.0, state.z2 + gain);
+    }
+
+    state.fsm = nextState;
+    state.pump = effectivePump;
+    state.alarm = (comb.A === 1 || nextState === 'FAULT_LOCK') ? 1 : 0;
+    state.fertPulse = fertPulse;
+
+    // FSM Codes & PIPO Bus
+    const codes = { 'IDLE': '00', 'ZONE_1_ACTIVE': '01', 'ZONE_2_ACTIVE': '10', 'FAULT_LOCK': '11' };
+    state.fsmCode = codes[state.fsm];
+    state.pipo = [
+      state.fsm === 'ZONE_1_ACTIVE' ? 1 : 0,
+      state.fsm === 'ZONE_2_ACTIVE' ? 1 : 0,
+      fertPulse ? 1 : 0,
+      state.alarm ? 1 : 0,
+    ];
+
+    updateHysteresis();
+    updateHUD();
+  }
+
+  function resetFault() {
+    if (state.tank < MIN_TANK_SAFE) return false;
+    state.fsm = 'IDLE';
+    state.watchdogTripped = false;
+    state.counter = 0;
+    state.pump = 0;
+    state.alarm = 0;
+    updateHysteresis();
+    updateHUD();
+    return true;
+  }
+
+  function resetFarm() {
+    state.z1 = 50.0;
+    state.z2 = 50.0;
+    state.tank = 80.0;
+    state.rain = false;
+    state.manual = false;
+    state.pipeBurst = false;
+    state.watchdogTripped = false;
+    state.fsm = 'IDLE';
+    state.counter = 0;
+    state.pump = 0;
+    state.alarm = 0;
+    state.fertPulse = false;
+    document.getElementById('btn-rain').classList.remove('active-toggle');
+    document.getElementById('btn-rain').innerText = '🌧️ Rain Interlock (OFF)';
+    document.getElementById('btn-manual').classList.remove('active-toggle');
+    document.getElementById('btn-manual').innerText = '🕹️ Manual Pump (OFF)';
+    updateHysteresis();
+    updateHUD();
+  }
+
+  // 1-Click Preset Triggers
+  function toggleRain() {
+    state.rain = !state.rain;
+    const btn = document.getElementById('btn-rain');
+    if (state.rain) {
+      btn.classList.add('active-toggle');
+      btn.innerText = '🌧️ Rain Interlock (ON)';
+    } else {
+      btn.classList.remove('active-toggle');
+      btn.innerText = '🌧️ Rain Interlock (OFF)';
+    }
+    stepClock();
+  }
+
+  function toggleManual() {
+    state.manual = !state.manual;
+    const btn = document.getElementById('btn-manual');
+    if (state.manual) {
+      btn.classList.add('active-toggle');
+      btn.innerText = '🕹️ Manual Pump (ON)';
+    } else {
+      btn.classList.remove('active-toggle');
+      btn.innerText = '🕹️ Manual Pump (OFF)';
+    }
+    stepClock();
+  }
+
+  function triggerZone1Dry() {
+    state.z1 = 20.0;
+    state.z2 = 65.0;
+    state.tank = 90.0;
+    state.rain = false;
+    state.pipeBurst = false;
+    updateHysteresis();
+    stepClock();
+  }
+
+  function triggerZone2Dry() {
+    state.z1 = 65.0;
+    state.z2 = 20.0;
+    state.tank = 90.0;
+    state.rain = false;
+    state.pipeBurst = false;
+    updateHysteresis();
+    stepClock();
+  }
+
+  function triggerFertigationDemo() {
+    state.z1 = 20.0;
+    state.tank = 90.0;
+    state.pipeBurst = true;
+    updateHysteresis();
+    for (let i = 0; i < 4; i++) stepClock();
+  }
+
+  function triggerLowTankFault() {
+    state.tank = 10.0;
+    stepClock();
+  }
+
+  function triggerPipeBurstWatchdog() {
+    state.z1 = 20.0;
+    state.tank = 90.0;
+    state.pipeBurst = true;
+    updateHysteresis();
+    for (let i = 0; i < 15; i++) stepClock();
+  }
+
+  function updateHUD() {
+    document.getElementById('hud-z1').innerText = state.z1.toFixed(1) + '%';
+    document.getElementById('hud-z2').innerText = state.z2.toFixed(1) + '%';
+    document.getElementById('hud-tank').innerText = state.tank.toFixed(1) + '%';
+    document.getElementById('hud-pump').innerText = state.pump ? '1 (ON)' : '0 (OFF)';
+    document.getElementById('hud-pump').style.color = state.pump ? '#81c784' : '#ffffff';
+    document.getElementById('hud-alarm').innerText = state.alarm ? '1 (ALARM)' : '0 (SAFE)';
+    document.getElementById('hud-alarm').style.color = state.alarm ? '#f44336' : '#ffffff';
+    
+    const binCnt = state.counter.toString(2).padStart(4, '0');
+    document.getElementById('hud-cnt').innerText = `${state.counter} [${binCnt}]`;
+
+    const fsmBadge = document.getElementById('fsm-badge');
+    fsmBadge.innerText = `STATE: ${state.fsm} (${state.fsmCode})`;
+    if (state.fsm === 'FAULT_LOCK') {
+      fsmBadge.className = 'badge badge-fault';
+    } else if (state.pump) {
+      fsmBadge.className = 'badge badge-live';
+    } else {
+      fsmBadge.className = 'badge badge-sim';
+    }
+
+    const pipoStr = state.pipo.join('');
+    const pipoHex = parseInt(pipoStr, 2).toString(16).toUpperCase();
+    document.getElementById('pipo-badge').innerText = `PIPO: ${pipoStr} [0x${pipoHex}]`;
+  }
+
+  // =========================================================================
+  // 2.5D ISOMETRIC BLENDER-SHADED CANVAS RENDERER
+  // =========================================================================
+
+  const canvas = document.getElementById('farmCanvas');
+  const ctx = canvas.getContext('2d');
+  let animationTick = 0;
+  let rainParticles = [];
+  let waterDroplets = [];
+
+  function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+    // Init rain particles
+    rainParticles = [];
+    for (let i = 0; i < 70; i++) {
+      rainParticles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        len: 10 + Math.random() * 12,
+        speed: 8 + Math.random() * 6
+      });
+    }
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Isometric Transformation Helper
+  function isoProject(x, y, z) {
+    const originX = canvas.width * 0.5;
+    const originY = canvas.height * 0.42;
+    const isoX = originX + (x - y) * 1.0;
+    const isoY = originY + (x + y) * 0.5 - z;
+    return { x: isoX, y: isoY };
+  }
+
+  // Draw 2.5D Shaded Tile
+  function drawIsoBlock(x, y, z, w, h, depth, topColor, leftColor, rightColor) {
+    const p1 = isoProject(x, y, z);
+    const p2 = isoProject(x + w, y, z);
+    const p3 = isoProject(x + w, y + h, z);
+    const p4 = isoProject(x, y + h, z);
+
+    const b1 = isoProject(x, y, z - depth);
+    const b2 = isoProject(x + w, y, z - depth);
+    const b3 = isoProject(x + w, y + h, z - depth);
+    const b4 = isoProject(x, y + h, z - depth);
+
+    // Left Face
+    ctx.fillStyle = leftColor;
+    ctx.beginPath();
+    ctx.moveTo(p4.x, p4.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.lineTo(b3.x, b3.y);
+    ctx.lineTo(b4.x, b4.y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right Face
+    ctx.fillStyle = rightColor;
+    ctx.beginPath();
+    ctx.moveTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.lineTo(b3.x, b3.y);
+    ctx.lineTo(b2.x, b2.y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Top Face
+    ctx.fillStyle = topColor;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.stroke();
+  }
+
+  // Render Loop
+  function render() {
+    animationTick++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background Gradient Ambient Glow
+    const bgGrad = ctx.createRadialGradient(canvas.width*0.5, canvas.height*0.5, 50, canvas.width*0.5, canvas.height*0.5, canvas.width*0.7);
+    bgGrad.addColorStop(0, '#152419');
+    bgGrad.addColorStop(1, '#09100a');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Draw Farm Ground Island (Base Plinth)
+    drawIsoBlock(-260, -140, -10, 520, 280, 20, '#2d4732', '#1b2d1f', '#132216');
+
+    // 2. Zone 1 Field (Left: Wheat/Maize)
+    const z1Hydrated = (state.fsm === 'ZONE_1_ACTIVE');
+    const z1SoilGrad = z1Hydrated ? '#3c5a2c' : (state.z1 < 30 ? '#5a4629' : '#474728');
+    drawIsoBlock(-230, -110, 0, 180, 100, 8, z1SoilGrad, '#282f1f', '#1d2316');
+
+    // Crop Furrows Zone 1
+    for (let row = 0; row < 5; row++) {
+      const pA = isoProject(-220 + row * 34, -105, 4);
+      const pB = isoProject(-220 + row * 34, -15, 4);
+      ctx.strokeStyle = z1Hydrated ? '#74c449' : (state.z1 < 30 ? '#c2a649' : '#8fa848');
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(pA.x, pA.y);
+      ctx.lineTo(pB.x, pB.y);
+      ctx.stroke();
+    }
+
+    // Label Zone 1
+    const z1Center = isoProject(-140, -60, 25);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`ZONE 1 (${state.z1.toFixed(0)}%)`, z1Center.x, z1Center.y);
+
+    // 3. Zone 2 Field (Right: Vegetables)
+    const z2Hydrated = (state.fsm === 'ZONE_2_ACTIVE');
+    const z2SoilGrad = z2Hydrated ? '#2f5738' : (state.z2 < 30 ? '#5a4629' : '#3f4728');
+    drawIsoBlock(-230, 10, 0, 180, 100, 8, z2SoilGrad, '#1f2e22', '#162218');
+
+    // Crop Furrows Zone 2
+    for (let row = 0; row < 5; row++) {
+      const pA = isoProject(-220 + row * 34, 15, 4);
+      const pB = isoProject(-220 + row * 34, 105, 4);
+      ctx.strokeStyle = z2Hydrated ? '#49c485' : (state.z2 < 30 ? '#c2a649' : '#6ea848');
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(pA.x, pA.y);
+      ctx.lineTo(pB.x, pB.y);
+      ctx.stroke();
+    }
+
+    // Label Zone 2
+    const z2Center = isoProject(-140, 60, 25);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText(`ZONE 2 (${state.z2.toFixed(0)}%)`, z2Center.x, z2Center.y);
+
+    // 4. Reservoir Tank (Isometric Cylinder / Tower)
+    const tankH = (state.tank / 100.0) * 60;
+    drawIsoBlock(60, -90, 0, 90, 90, 10, '#37474f', '#263238', '#1c2429'); // Tank base
+    // Tank Water Column
+    const waterColor = state.tank < 20 ? '#c62828' : '#0288d1';
+    drawIsoBlock(65, -85, 10, 80, 80, tankH, waterColor, '#01579b', '#013b68');
+
+    const tankCenter = isoProject(105, -45, tankH + 30);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`TANK (${state.tank.toFixed(0)}%)`, tankCenter.x, tankCenter.y);
+
+    // 5. Main Pump & Valve Piping Network
+    const pipeStart = isoProject(60, -45, 15);
+    const junction = isoProject(0, -45, 15);
+    const z1ValvePos = isoProject(-50, -45, 15);
+    const z2ValvePos = isoProject(-50, 45, 15);
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = state.pump ? '#00e5ff' : '#607d8b';
+    ctx.beginPath();
+    ctx.moveTo(pipeStart.x, pipeStart.y);
+    ctx.lineTo(junction.x, junction.y);
+    ctx.lineTo(z1ValvePos.x, z1ValvePos.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(junction.x, junction.y);
+    ctx.lineTo(isoProject(0, 45, 15).x, isoProject(0, 45, 15).y);
+    ctx.lineTo(z2ValvePos.x, z2ValvePos.y);
+    ctx.stroke();
+
+    // Pump Station Housing
+    drawIsoBlock(15, -60, 0, 30, 30, 25, state.pump ? '#00c853' : '#455a64', '#2e3d43', '#1e292d');
+    const pumpLabel = isoProject(30, -45, 40);
+    ctx.fillStyle = state.pump ? '#00e676' : '#b0bec5';
+    ctx.fillText(state.pump ? 'PUMP: ON' : 'PUMP: OFF', pumpLabel.x, pumpLabel.y);
+
+    // Pipe Burst Water Jet Animation
+    if (state.pipeBurst && state.pump) {
+      for (let j = 0; j < 6; j++) {
+        const offset = (Math.random() - 0.5) * 30;
+        ctx.fillStyle = '#80d8ff';
+        ctx.beginPath();
+        ctx.arc(junction.x + offset, junction.y - Math.random() * 40, 2 + Math.random()*2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#ff1744';
+      ctx.fillText('💥 PIPE BURST', junction.x, junction.y - 45);
+    }
+
+    // Fertigation Nutrient Injection Pulse (Count 4)
+    if (state.fertPulse) {
+      drawIsoBlock(20, -100, 0, 25, 25, 30, '#ffd600', '#c7a500', '#997e00');
+      ctx.fillStyle = '#ffd600';
+      const fertLbl = isoProject(32, -87, 45);
+      ctx.fillText('🧪 NPK PULSE', fertLbl.x, fertLbl.y);
+    }
+
+    // Sprinkler Droplet Particle System
+    if (state.pump) {
+      const targetPos = state.fsm === 'ZONE_1_ACTIVE' ? z1Center : (state.fsm === 'ZONE_2_ACTIVE' ? z2Center : null);
+      if (targetPos) {
+        for (let d = 0; d < 8; d++) {
+          const dropX = targetPos.x + (Math.random() - 0.5) * 80;
+          const dropY = targetPos.y + (Math.random() - 0.5) * 50;
+          ctx.fillStyle = 'rgba(77, 208, 225, 0.7)';
+          ctx.beginPath();
+          ctx.arc(dropX, dropY, 2, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+    }
+
+    // Rainfall Particle System
+    if (state.rain) {
+      ctx.strokeStyle = 'rgba(129, 212, 250, 0.65)';
+      ctx.lineWidth = 1.5;
+      rainParticles.forEach(p => {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - 2, p.y + p.len);
+        ctx.stroke();
+        p.y += p.speed;
+        p.x -= 1;
+        if (p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fillText('🌧️ PRECIPITATION INTERLOCK ACTIVE', canvas.width * 0.5, 30);
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  updateHysteresis();
+  updateHUD();
+  requestAnimationFrame(render);
+</script>
+
+</body>
+</html>
