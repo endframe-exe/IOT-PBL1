@@ -293,7 +293,7 @@ with tabs[0]:
     with col_tw2:
         st.link_button(
             "⚡ Open Wokwi Hardware Twin (Uno)",
-            "https://wokwi.com/projects/new/arduino-uno",
+            "https://wokwi.com/projects/481847252893088769",
             type="primary",
             use_container_width=True,
         )

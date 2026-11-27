@@ -3,7 +3,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Tests Passing](https://img.shields.io/badge/tests-45%20passed-brightgreen.svg)]()
 [![DEC0101 Syllabus](https://img.shields.io/badge/syllabus-DEC0101%20DEC0151-forestgreen.svg)]()
-[![Wokwi Parity](https://img.shields.io/badge/hardware-Wokwi%20Uno-orange.svg)](https://wokwi.com/projects/new/arduino-uno)
+[![Wokwi Parity](https://img.shields.io/badge/hardware-Wokwi%20Uno-orange.svg)](https://wokwi.com/projects/481847252893088769)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-endframe--exe%2FIOT--PBL1-black.svg)](https://github.com/endframe-exe/IOT-PBL1)
 
 > **Academic Project Notice:**  
@@ -161,7 +161,7 @@ streamlit run app.py
 ## 6. Wokwi Hardware Simulation Setup
 
 Run our standalone embedded microcontroller simulation directly in your browser:
-1. Open the [Wokwi Arduino Uno Simulator](https://wokwi.com/projects/new/arduino-uno).
+1. Open the [Wokwi Arduino Uno Simulator](https://wokwi.com/projects/481847252893088769).
 2. Paste the contents of [firmware/wokwi/sketch.ino](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/firmware/wokwi/sketch.ino) into the sketch editor.
 3. Paste the contents of [firmware/wokwi/diagram.json](file:///c:/Users/akhil/Downloads/PBL%20PROJECTS/IOT%20PBL/gemini%20project/firmware/wokwi/diagram.json) into the diagram tab.
 4. Click **Start Simulation (Play)**.
